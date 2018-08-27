@@ -1,0 +1,241 @@
+#pragma once
+
+template<class T>
+struct BinaryTreeNode
+{
+	T _data;
+	BinaryTreeNode<T>* _left;
+	BinaryTreeNode<T>* _right;
+
+	BinaryTreeNode(const T& x)
+		:_data(x)
+		, _left(NULL)
+		, _right(NULL)
+	{}
+
+};
+
+template<class T>
+class BinaryTree{
+	typedef BinaryTreeNode<T> Node;
+public:
+	BinaryTree()
+		:_root(NULL)
+	{}
+	BinaryTree(T* a, size_t n, const T& invalid)
+	{
+		size_t index=0;
+		_root=createBinaryTree(a,n, invalid, index);
+	}
+	BinaryTree(const BinaryTree<T>& t)
+	{
+		_root = _Copy(t._root);
+	}
+	BinaryTree<T>& operator=(BinaryTree<T>& t)
+	{
+		if (this != &t)
+		{
+			swap(t._root,_root);
+		}
+	}
+	~BinaryTree()
+	{
+		_destory(_root);
+	}
+
+	void PrevOrder()//前序遍历 递归
+	{
+		cout << "PrevOrder" << endl;
+		return _prevorder(_root);
+	}
+	void _prevorder(Node* root)
+	{
+		if (root == NULL)
+			return;
+		
+		cout << root->_data << " ";
+		_prevorder(root->_left);
+		_prevorder(root->_right);
+	}
+	void InOrder()//中序遍历 递归
+	{
+		cout << "InOrder:" << endl;
+		return _inorder(_root);
+	}
+	void _inorder(Node* root)
+	{
+		if (root == NULL)
+			return ;
+		
+		_inorder(root->_left);
+		cout << root->_data << " ";
+		_inorder(root->_right);
+	}
+	void PostOrder()//后序遍历 递归
+	{
+		cout << "PostOrder:" << endl;
+		return _postorder(_root);
+	}
+	void _postorder(Node* root)
+	{
+		if (root == NULL)
+			return ;
+		
+		_postorder(root->_left);
+		_postorder(root->_right);
+		cout << root->_data << " ";
+	}
+	void LevelOrder()//层序遍历
+	{
+		cout << "LevelOrder" << endl;
+		return _levelorder(_root);
+	}
+	void _levelorder(Node* root)
+	{
+		queue<Node*> q1;
+		if (root == NULL)
+		{
+			return;
+		}
+		q1.push(root);
+
+		while (!q1.empty())
+		{
+			Node* front = q1.front();
+			cout << front->_data << " ";
+			if (front->_left)
+				q1.push(front->_left);
+			if (front->_right)
+				q1.push(front->_right);
+
+			q1.pop();
+		}
+	}
+	//void PrevOrder_NonR();
+	//void InOrder_NonR();
+	//void PostOrder_NonR();
+
+	size_t Size()
+	{
+		return _size(_root);
+	}
+	size_t _size(Node* _root)
+	{
+		if (_root == NULL)
+			return 0;
+
+		size_t left = _size(_root->_left);
+		size_t right = _size(_root->_right);
+		return left + right + 1;
+	}
+	size_t Depth()
+	{
+		return _depth(_root);
+	}
+	size_t _depth(Node* root)
+	{
+		if (root == NULL)
+			return 0;
+
+		size_t left = _depth(root->_left);
+		size_t right = _depth(root->_right);
+		return (left > right) ? left + 1 : right + 1;
+	}
+	size_t LeafSize()//叶子节点数
+	{
+		return _leafsize(_root);
+	}
+	size_t _leafsize(Node* root)
+	{
+		if (root == NULL)
+			return 0;
+		if (root->_left == NULL&&root->_right == NULL)
+			return 1;
+		size_t left = _leafsize(root->_left);
+		size_t right = _leafsize(root->_right);
+		return left + right;
+	}
+	size_t GetKLevel(size_t k)//第K层的结点数
+	{
+		return _getklevel(_root, k);
+	}
+	size_t _getklevel(Node* root, size_t k)
+	{
+		if (root == NULL && k<1)
+			return 0;
+		if (k == 1)
+			return 1;
+		return _getklevel(root->_left, k - 1) + _getklevel(root->_right, k - 1);
+	}
+	Node* Find(const T& x)
+	{
+		return _find(_root, x);
+	}
+	Node* _find(Node* root, const T& x)
+	{
+		if (root == NULL)
+			return NULL;
+		if (root->_data == x)
+			return _root;
+		Node* tmp = _find(root->_left, x)
+		if (tmp)
+		{
+			return tmp;
+		}
+		return _find(root->_right, x);
+	}
+protected:
+	Node* createBinaryTree(T*a, size_t n, const T& invalid,size_t& index)
+	{
+		Node* root = NULL;
+		if (index<n && a[index] != invalid)
+		{
+			root = new Node(a[index]);
+			root->_left=createBinaryTree( a, n, invalid, ++index);
+			root->_right=createBinaryTree(a, n, invalid, ++index);
+		}
+		return root;
+	}
+	Node* _Copy(Node* root)
+	{
+		if (root == NULL)
+		{
+			return NULL;
+		}
+		Node* newroot = new Node(root->_data);
+		newroot->_left = _Copy(root->_left);
+		newroot->_right = _Copy(root->_right);
+		return newroot;
+	}
+	void _destory(Node* _root)
+	{
+		if (_root)
+		{
+			_destory(_root->_left);
+			_destory(_root->_right);
+			delete _root;
+			_root = NULL;
+		}
+	}
+private:
+	Node* _root;
+	size_t index;
+	size_t invalid;
+};
+
+
+void Test1()
+{
+	int a1[10] = { 1, 2, 3, '#', '#', 4, '#', '#', 5, 6 };
+	//int a2[15] = {1,2,'#',3,'#','#',4,5,'#',6,'#',7,'#','#',8}; 
+	BinaryTree<int> t1(a1, 10, '#');
+    t1.PrevOrder();
+	cout << endl;
+	t1.InOrder();
+	cout << endl;
+	t1.LevelOrder();
+	cout << endl;
+    cout << "t1 Size:" << t1.Size() << endl;
+	cout << "t1 Depth:" << t1.Depth() << endl;
+	cout << "t1 LeafSize:" << t1.LeafSize();
+}
