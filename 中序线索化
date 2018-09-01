@@ -1,0 +1,46 @@
+enum PointerType //枚举类型  
+{  
+    THREAD,  //已线索化的  
+    LINK    //连接节点，未线索化.  
+};  
+template<class T>  
+struct BinaryTreeNodeThd  
+{  
+    BinaryTreeNodeThd<T>* _letf;  
+    BinaryTreeNodeThd<T>* _right;  
+    T _data;  
+    PointerType _leftType;  
+    PointerType _rightType;  
+  
+    BinaryTreeNodeThd(const T& x)  
+        :_data(x)  
+        , _letf(NULL)  
+        , _right(NULL)  
+        , _leftType(LINK)  
+        , _rightType(LINK)  
+    {}  
+};  
+
+
+
+
+void _inorderthreading(Node* root,Node* &prev)
+{
+   if(root==NULL)
+      return ;
+      
+      _inorderthreading(cur->_left,prev);//如果是空树链，它的线索化_left指向上一个结点，并标记
+      if(root->_left==NULL)
+      {
+      cur->_left=prev; 
+      cur->_leftType=THREAD;
+      }
+      //如果是空树链，上一个结点的线索化_right指向我，并标记
+      if(prev&&prev->_right==NULL)
+      {
+          prev->_right=cur;
+          prev->rightType=THREAD;
+      }
+     prev=cur;
+     _inorderthreading(cur->_right,prev);
+}
