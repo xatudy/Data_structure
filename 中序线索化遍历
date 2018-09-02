@@ -1,0 +1,37 @@
+//针对中序线索化以后的遍历
+	void inorderThd()
+	{
+		Node* cur = _root;
+		while (cur)
+		{
+			//找到最左结点，开始遍历.
+			while (cur->_leftType == LINK)
+			{
+				cur = cur->_letf;
+			}
+			cout << cur->_data << " ";
+			//原始版本，放在这里有助于理解
+	        /*if (cur->_rightType == LINK)
+			{
+				cur = cur->_right;
+			}
+			else
+			{
+				while (cur->_rightType == THREAD)
+				{
+					cur = cur->_right;
+					cout << cur->_data << " ";
+				}
+				cur = cur->_right;
+			}*/
+ 
+			//****优化后****
+			while (cur->_rightType == THREAD)
+			{
+				cur = cur->_right;
+				cout << cur->_data << " ";
+			}
+			cur = cur->_right;
+ 
+		}
+	}
