@@ -1,0 +1,16 @@
+//前序线索化遍历
+	void prevOrder()
+	{
+		Node* cur = _root;
+		while (cur)
+		{
+			//找到最左结点
+			while (cur->_leftType == LINK)
+			{
+				cout << cur->_data << " ";
+				cur = cur->_letf;
+			}
+			cout << cur->_data << " ";
+			cur = cur->_right;	
+		}
+	}
