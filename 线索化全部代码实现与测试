@@ -1,0 +1,203 @@
+#include<iostream>
+#include<Windows.h>
+using namespace std;
+ 
+enum PointerType //枚举类型
+{
+	THREAD,  //已线索化的
+	LINK    //连接节点，未线索化.
+};
+template<class T>
+struct BinaryTreeNodeThd
+{
+	BinaryTreeNodeThd<T>* _letf;
+	BinaryTreeNodeThd<T>* _right;
+	T _data;
+	PointerType _leftType;
+	PointerType _rightType;
+ 
+	BinaryTreeNodeThd(const T& x)
+		:_data(x)
+		, _letf(NULL)
+		, _right(NULL)
+		, _leftType(LINK)
+		, _rightType(LINK)
+	{}
+};
+ 
+template<class T>
+class BinaryTreeThd
+{
+	typedef BinaryTreeNodeThd<T> Node;
+ 
+public:
+	BinaryTreeThd(T* a, size_t n, const T& invalid)
+	{
+		size_t index = 0;
+		_root = CreateTree(a, n, invalid, index);
+	}
+	void InOrderThreading()
+	{
+		Node* prev = NULL;
+		_InOrderThreading(_root, prev);
+	}
+	void PreOrderTheeady()
+	{
+		Node* prev = NULL;
+		_PreOrderTheeady(_root, prev);
+	}
+ 
+	//前序线索化遍历
+	void prevOrder()
+	{
+		Node* cur = _root;
+		while (cur)
+		{
+			//找到最左结点
+			while (cur->_leftType == LINK)
+			{
+				cout << cur->_data << " ";
+				cur = cur->_letf;
+			}
+			cout << cur->_data << " ";
+			cur = cur->_right;	
+		}
+	}
+	/*if (cur->_leftType == THREAD || cur->_rightType == THREAD)
+	{
+	cout << cur->_data << " ";
+	cur = cur->_right;
+	}*/
+ 
+ 
+ 
+	//针对中序线索化以后的遍历
+	void inorderThd()
+	{
+		Node* cur = _root;
+		while (cur)
+		{
+			//找到最左结点，开始遍历.
+			while (cur->_leftType == LINK)
+			{
+				cur = cur->_letf;
+			}
+			cout << cur->_data << " ";
+			//原始版本，放在这里有助于理解
+	        /*if (cur->_rightType == LINK)
+			{
+				cur = cur->_right;
+			}
+			else
+			{
+				while (cur->_rightType == THREAD)
+				{
+					cur = cur->_right;
+					cout << cur->_data << " ";
+				}
+				cur = cur->_right;
+			}*/
+ 
+			//****优化后****
+			while (cur->_rightType == THREAD)
+			{
+				cur = cur->_right;
+				cout << cur->_data << " ";
+			}
+			cur = cur->_right;
+ 
+		}
+	}
+ 
+protected:
+ 
+	//中序线索化
+	void _InOrderThreading(Node* cur,Node* & prev)
+	{
+		if (cur)
+		{
+			_InOrderThreading(cur->_letf, prev);
+			//如果是空树链，它的线索化_left指向上一个结点，并标记。
+			if (cur->_letf == NULL)
+			{
+				cur->_letf = prev;
+				cur->_leftType = THREAD;
+			}
+			//如果是空树链，上一个结点的线索化_right指向我，并标记。
+			if (prev&&prev->_right == NULL)
+			{
+				prev->_right = cur;
+				prev->_rightType = THREAD;
+			}
+			prev = cur;
+			_InOrderThreading(cur->_right, prev);
+		}
+	}
+ 
+ 
+	//重要的事情说3遍，这里的Node* & 必须加上引用，要不然上层对prev的修改就是没有意义的.
+	//重要的事情说3遍，这里的Node* & 必须加上引用，要不然上层对prev的修改就是没有意义的.
+	//重要的事情说3遍，这里的Node* & 必须加上引用，要不然上层对prev的修改就是没有意义的.
+	//MD害老子调半天
+ 
+	void _PreOrderTheeady(Node* cur, Node* & prev)
+	{
+		if (cur == NULL)
+		{
+			return;
+		}
+		//如果是空树链，它的线索化_left指向上一个结点，并标记。
+		if (cur->_letf == NULL)
+		{
+			cur->_letf = prev;
+			cur->_leftType = THREAD;
+		}
+		//如果是空树链，上一个结点的线索化_right指向我，并标记。
+		if (prev&&prev->_right == NULL)
+		{
+			prev->_right = cur;
+			prev->_rightType = THREAD;
+		}
+		prev = cur;
+		//if里的条件 防止重复访问结点
+		if (cur->_leftType == LINK)
+		{
+			_PreOrderTheeady(cur->_letf, prev);
+		}
+		//if里的条件 防止重复访问结点
+		if (cur->_rightType == LINK)
+		{
+			_PreOrderTheeady(cur->_right, prev);
+		}
+	}
+	//注意这里的index 要使用引用， 若是没有使用 上一层递归里面的++index 对上一层没有任何影响.
+	//构建二叉树表
+	Node* CreateTree(T* a, size_t n, const T& invalid, size_t& index)
+	{
+		Node* root = NULL;
+		if (index < n && a[index] != invalid)
+		{
+			root = new Node(a[index]);
+			root->_letf = CreateTree(a, n, invalid, ++index);
+			root->_right = CreateTree(a, n, invalid, ++index);
+		}
+		return root;
+	}
+ 
+protected:
+ 
+	Node* _root;
+	Node* _left;
+	Node* _right;
+};
+ 
+ 
+void Test()
+{
+	int array[10] = { 1, 2, 3, '#', '#', 4, '#', '#', 5, 6 };
+	BinaryTreeThd<int> t1(array, sizeof(array) / sizeof(array[0]), '#');
+	/*t1.InOrderThreading();
+	t1.inorderThd();*/
+	t1.PreOrderTheeady();
+	t1.prevOrder();
+}
