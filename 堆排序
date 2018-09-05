@@ -1,0 +1,51 @@
+void _Adjustdown(int* array, int k, int parent)
+{
+	int child = parent * 2 + 1;
+	//int rightchild = parent * 2 + 2;
+	while (child<k)
+	{
+		if (child + 1 < k && (array[child + 1] > array[child]))
+		{
+			++child;
+		}
+		if (array[child] > array[parent])
+		{
+			swap(array[child], array[parent]);
+			parent = child;
+			child = parent * 2 + 1;
+		}
+		else
+		{
+			break;
+		}
+	}
+}
+void heapsort(int *array, size_t n)
+{
+	for (size_t i = (n - 2) >> 1; i >0;--i)
+	{
+		_Adjustdown(array, n, i);
+	}
+	int end = n - 1;
+	while (end)
+	{
+		swap(array[0], array[end]);
+		_Adjustdown(array, end, 0);
+		--end;
+	}
+}
+
+int main()
+{
+	int a[] = { 9, 5, 2, 7 ,6};
+	rsize_t size = sizeof(a) / sizeof(int);
+	
+	heapsort(a, size);
+	for (size_t i = 0; i < size; ++i)
+	{
+		cout << a[i] << " ";
+	}
+	cout << endl;
+	system("pause");
+	return 0;
+}
