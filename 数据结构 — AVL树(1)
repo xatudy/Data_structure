@@ -1,0 +1,68 @@
+ AVL树的结点
+ 
+ template<class T>
+ struct AVLTreeNode{
+ 
+     T* _key;
+     AVLTreeNode<T>* _left;
+     AVLTreeNode<T>* _right;
+     AVLTreeNode<T>* _parent;
+     int _bf  //平衡因子
+     
+     AVLTreeNode（const T& key）
+             :_left(NULL)
+             ,_right(NULL)
+             ,_parent(NULL)
+             ,_key(key)
+             ,_bf(0)
+     {}
+     
+ }
+ typedef AVLTreeNode Node
+ 
+ //首先这里的_key就是我们结点里面存储的数据， 这里着重的说明 _bf  它就是AVL树的关键也是最不好掌控的的东西->平衡因子平衡因子有什么用？ 
+
+//可以说平衡因子控制着AVL的平衡，每一个结点的平衡因子的值就是该节点 右子树的高度减去左子树的高度。由于AVL树的概念：AVL树中任何节点的两
+
+//个子树的高度最大差别为1。 所以平衡因子正常的值只有 0,-1,1 当你的平衡因子不等于这三个数字时，就要开始进行AVL树的旋转调整了
+
+
+//平衡因子的生成
+size_t _Depth(Node* root)
+	{
+		if (root == NULL)
+		{
+			return 0;
+		}
+		else
+		{
+			size_t i = _Depth(root->_left);
+			size_t j = _Depth(root->_right);
+			if (i > j)
+			{
+				return i + 1;
+			}
+			else
+			{
+				return j + 1;
+			}
+		}
+	}
+void _calcBalance(Node* root)
+	{
+		calcBalance(_root);
+	}
+	void calcBalance(Node* root)
+	{
+		if (root == NULL)
+			return;
+ 
+		root->_bf = _Depth(root->_right) - _Depth(root->_left);
+ 
+		calcBalance(root->_left);
+		calcBalance(root->_right);
+	}
+
+
+
+
