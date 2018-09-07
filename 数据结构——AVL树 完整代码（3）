@@ -1,0 +1,310 @@
+#pragma once
+#include<iostream>
+#include<Windows.h>
+#include<math.h>
+using namespace std;
+ 
+ 
+template<class K, class V>
+struct AVLTreeNode
+{
+	K _key;
+	V _value;
+ 
+	AVLTreeNode<K, V>* _left;
+	AVLTreeNode<K, V>* _right;
+	AVLTreeNode<K, V>* _parent;
+ 
+ 
+	int _bf;
+ 
+	AVLTreeNode(const K& key)
+		:_left(NULL)
+		, _right(NULL)
+		, _parent(NULL)
+		, _key(key)
+		, _value(0)
+		, _bf(0)
+	{}
+};
+ 
+ 
+ 
+template<class K,class V>
+class AVLTree
+{
+	typedef AVLTreeNode<K, V> Node;
+public:
+	AVLTree()
+		:_root(NULL)
+	{}
+ 
+	~AVLTree()
+	{}
+ 
+public:
+ 
+ 
+	bool Insert(const K& key)
+	{
+		//1.空树
+		if (_root == NULL)
+		{
+			_root = new Node(key);
+		}
+		//2.查找位置
+		Node* cur = _root;
+		Node* parent = NULL;
+		while (cur)
+		{
+			if (cur->_key > key)
+			{
+				parent = cur;
+				cur = cur->_left;
+			}
+			else if (cur->_key < key)
+			{
+				parent = cur;
+				cur = cur->_right;
+			}
+			else
+				return false;
+		}
+		//3.插入节点
+		if (parent->_key > key)
+		{
+			parent->_left = new Node(key);
+			parent->_left->_parent = parent;
+ 
+		}
+		else
+		{
+			parent->_right = new Node(key);
+			parent->_right->_parent = parent;
+		}
+ 
+		_calcBalance(_root);
+ 
+		Node* ppNode = parent->_parent;
+		if (ppNode && abs(ppNode->_bf) > 1)
+		{
+ 
+			if (ppNode->_bf < -1)
+			{
+				if (parent->_left)
+					_RotateR(ppNode);
+				else
+					_RotateRL(ppNode);
+					
+			}
+ 
+			if (ppNode->_bf > 1)
+			{
+				if (parent->_right)
+					_RotateL(ppNode);
+				else
+					_RotateLR(ppNode);
+			}
+		}
+		_calcBalance(_root);
+		return true;
+	}
+ 
+	bool _IsBIanceTree()
+	{
+		return IsBIanceTree(_root);
+	}
+ 
+	Node* Find(const K& key)
+	{
+		if (_root == NULL)
+		{
+			return NULL;
+		}
+		Node* cur = _root;
+		while (cur)
+		{
+			if (cur->_key < key)
+			{
+				cur = cur->_right;
+			}
+			else if (cur->_key > key)
+			{
+				cur = cur->_left;
+			}
+			else
+			{
+				return cur;
+			}
+		}
+		return NULL;
+	}
+ 
+	
+ 
+	void _calcBalance(Node* root)
+	{
+		calcBalance(_root);
+	}
+ 
+	size_t _Depth(Node* root)
+	{
+		if (root == NULL)
+		{
+			return 0;
+		}
+		else
+		{
+			size_t i = _Depth(root->_left);
+			size_t j = _Depth(root->_right);
+			if (i > j)
+			{
+				return i + 1;
+			}
+			else
+			{
+				return j + 1;
+			}
+		}
+	}
+ 
+	void Inreder()
+	{
+		_Inreder(_root);
+	}
+ 
+protected:
+ 
+ 
+	bool IsBIanceTree(Node* root)
+	{
+		if (root == NULL)
+			return true;
+		size_t left = _Depth(root->_left);
+		size_t right = _Depth(root->_right);
+		int mid = right - left;
+		if (abs(mid) > 2)
+		{
+			cout << "这里有问题:" << root->_key << endl;
+		}
+ 
+		return abs(mid) < 2
+			&& IsBIanceTree(root->_left)
+			&& IsBIanceTree(root->_right);
+	}
+ 
+	void _Inreder(Node* root)
+	{
+		if (root == NULL)
+			return;
+		_Inreder(root->_left);
+		cout << root->_key << " ";
+		_Inreder(root->_right);
+	}
+ 
+	
+	void calcBalance(Node* root)
+	{
+		if (root == NULL)
+			return;
+ 
+		root->_bf = _Depth(root->_right) - _Depth(root->_left);
+ 
+		calcBalance(root->_left);
+		calcBalance(root->_right);
+	}
+ 
+ 
+	void _RotateR(Node*& parent)
+	{
+		Node* subL = parent->_left;
+		Node* subLR = NULL;
+		if (subL)
+			subLR = subL->_right;
+		parent->_left = subLR;
+		if (subLR)
+			subLR->_parent = parent;
+		Node* ppNode = parent->_parent;
+		subL->_right = parent;
+		parent->_parent = subL;
+		if (ppNode == NULL)
+		{
+			_root = subL;
+			_root->_parent = NULL;
+		}
+		else
+		{
+			if (ppNode->_left == parent)
+				ppNode->_left = subL;
+			else
+				ppNode->_right = subL;
+			subL->_parent = ppNode;
+		}
+	}
+ 
+ 
+	void _RotateL(Node*& parent)
+	{
+		Node* subR = parent->_right;
+		Node* subRL = NULL;
+		if (subR)
+		 subRL = subR->_left;
+ 
+		parent->_right = subRL;
+		if (subRL)
+			subRL->_parent = parent;
+		Node* ppNode = parent->_parent;
+		subR->_left = parent;
+		parent->_parent = subR;
+ 
+		if (ppNode == NULL)
+		{
+			_root = subR;
+			_root->_parent = NULL;
+		}
+		else
+		{
+			if (ppNode->_left == parent)
+				ppNode->_left = subR;
+			else
+				ppNode->_right = subR;
+			subR->_parent = ppNode;
+		}
+	}
+	void _RotateLR(Node*& parent)
+	{
+ 
+		_RotateR(parent->_right);
+		_RotateL(parent);
+	}
+	void _RotateRL(Node*& parent)
+	{
+ 
+		_RotateL(parent->_left);
+		_RotateR(parent);
+ 
+	}
+protected:
+	Node* _root;
+};
+void TestPHSBTree1()
+{
+ 
+	AVLTree<int, int> t1;
+	
+ 
+	int a[] = { 2, 4, 3, 1, 0, 6, 5 };
+	
+ 
+	for (size_t i = 0; i < sizeof(a) / sizeof(a[0]); ++i)
+	{
+		t1.Insert(a[i]);
+	}
+ 
+	if (t1._IsBIanceTree())
+		cout << "构建AVL树正确" << endl;
+	else
+		cout << "构架AVL数出现错误" << endl;
+	t1.Inreder();
+	 
+}
