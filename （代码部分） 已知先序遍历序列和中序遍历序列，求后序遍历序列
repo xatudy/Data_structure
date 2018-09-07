@@ -1,0 +1,57 @@
+struct Node
+{
+	char data;
+	Node *left;
+	Node *right;
+};
+ 
+Node *getBinaryTree(char *preOrder, char *inOrder, int len)
+{
+	if (preOrder == NULL || *preOrder == '\0' || len <= 0)
+		return NULL;
+		
+	Node *root = new Node;
+	root->data = *preOrder;	// 前序遍历的第一个节点就是根节点
+	
+	// 找到根节点在中序遍历中的位置，其值也代表了左子树的节点数目
+	int pos = 0;
+	while (1)
+	{
+		if (*(inOrder + pos) == root->data)
+		{
+			break;
+		}
+		pos++;
+	}
+	
+	// 递归找到左子树和右子树
+	if (0 == pos)
+	{
+		root->left = NULL;
+	}
+	else
+	{
+		root->left = getBinaryTree(preOrder + 1, inOrder, pos);
+	}
+	
+	if (0 == len - pos - 1)
+	{
+		root->right = NULL;
+	}
+	else
+	{
+		root->right = getBinaryTree(preOrder + pos + 1, inOrder + pos + 1, len - pos - 1);
+	}
+	
+	return root;
+}
+ 
+void postOrder(Node *root)
+{
+	if (root == NULL)
+		return;
+		
+	postOrder(root->left);
+	postOrder(root->right);
+	cout << root->data;
+}
