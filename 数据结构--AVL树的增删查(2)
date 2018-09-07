@@ -1,0 +1,218 @@
+查找  根据其性质  将比较key的大小 小于到左子树中查找  大于到右子数中查找
+Node* Find(const K& key,Node* _root)
+{
+    if(_root==NULL)
+      return NULL;
+    Node* cur=_root;
+    if(key<cur->_key)
+    {
+       Find(key,cur->_left);
+    }
+    if(key>cur->_key)
+    {
+      Find(key,cur->_right);
+    }
+    
+    if(key==cur->_key)
+    {
+      return cur;
+    }else{
+      return NULL; 
+    }
+}
+
+插入就涉及到  平衡因子超过范围 -1<<_br<<1;  超出范围就涉及到 旋转  左单旋  右单旋   左右双旋  右左双旋 
+       10（parent）
+     d    20 （subR)
+(subRL) c    30
+           a    b      如果这样将30插入就会造成_br超出范围  所以进行左单旋转
+           
+           20 
+       10      30
+     d    c  a    b
+
+void _RotateLeft(Node*& parent)
+{
+   if(_parent==NULL)
+   {
+    return NULL;
+   }
+   Node*subR=parent->_right;
+   Node*subRL=NULL;
+   if(subR)
+   {
+   subRL=subR->_left;
+   parent->_right=subRL;
+   }
+   if(subRL)
+   {
+    subRL->_parent=parent;
+    Node*ppNode=parent->_parent;
+    subR->_left=parent;
+    parent->_parent=subR;
+   }
+   
+   if(ppNode==NULL)
+   {
+     _root=subR;
+     _root->_parent=NULL;
+   
+   }else{
+      if（ppNode->_left==parent）
+      {
+          ppNode->_left=subR;
+      }else{
+          ppNode->_right=subR;
+      }
+      subR->_parent=ppNode;
+   }
+}
+
+右单旋 和左单旋类似 
+void _RotateR(Node*& parent)
+	{
+		Node* subL = parent->_left;
+		Node* subLR = NULL;
+		if (subL)
+			subLR = subL->_right;
+		parent->_left = subLR;
+		if (subLR)
+			subLR->_parent = parent;
+		Node* ppNode = parent->_parent;
+		subL->_right = parent;
+		parent->_parent = subL;
+		if (ppNode == NULL)
+		{
+			_root = subL;
+			_root->_parent = NULL;
+		}
+		else
+		{
+			if (ppNode->_left == parent)
+				ppNode->_left = subL;
+			else
+				ppNode->_right = subL;
+			subL->_parent = ppNode;
+		}
+	}
+
+其实所谓的双旋其实就是两次单旋的先后使用.
+
+我们先对parent进行右单旋，让这个子树满足左单旋的条件，再然后调用左单旋进行调节高度。
+
+具体过程就是上面两种情况的先后执行.
+void _RotateLR(Node*& parent)   左右双旋
+	{
+ 
+		_RotateR(parent->_right);
+		_RotateL(parent);
+	}
+
+我们先对parent进行左单旋，让这个子树满足右单旋的条件，再然后调用右单旋进行调节
+
+高度。具体过程就是上面两种情况的先手执行.
+	void _RotateRL(Node*& parent)   右左双旋
+	{
+ 
+		_RotateL(parent->_left);
+		_RotateR(parent);
+ 
+	}
+
+
+插入时 找的合适的位置插入  大于_key往右子数插入 小于往左子树插入  插入后生成平和因子 看是否需要进行旋转调整
+
+ 	bool Insert(const K& key)
+	{
+		//1.空树
+		if (_root == NULL)
+		{
+			_root = new Node(key);
+		}
+		//2.查找位置
+		Node* cur = _root;
+		Node* parent = NULL;
+		while (cur)
+		{
+			if (cur->_key > key)
+			{
+				parent = cur;
+				cur = cur->_left;
+			}
+			else if (cur->_key < key)
+			{
+				parent = cur;
+				cur = cur->_right;
+			}
+			else
+				return false;
+		}
+		//3.插入节点
+		if (parent->_key > key)
+		{
+			parent->_left = new Node(key);
+			parent->_left->_parent = parent;
+ 
+		}
+		else
+		{
+			parent->_right = new Node(key);
+			parent->_right->_parent = parent;
+		}
+ 
+		_calcBalance(_root);
+ 
+		Node* ppNode = parent->_parent;
+		if (ppNode && abs(ppNode->_bf) > 1)
+		{
+ 
+			if (ppNode->_bf < -1)
+			{
+				if (parent->_left)
+					_RotateR(ppNode);
+				else
+					_RotateRL(ppNode);
+					
+			}
+ 
+			if (ppNode->_bf > 1)
+			{
+				if (parent->_right)
+					_RotateL(ppNode);
+				else
+					_RotateLR(ppNode);
+			}
+		}
+		_calcBalance(ppNode);
+		return true;
+	}
+       
+判断这颗树是否为AVLTree
+bool IsBIanceTree(Node* root)
+	{
+		if (root == NULL)
+			return true;
+		size_t left = _Depth(root->_left);
+		size_t right = _Depth(root->_right);
+		int mid = right - left;
+		if (abs(mid) > 2)
+		{
+			cout << "这里有问题:" << root->_key << endl;
+		}
+ 
+		return abs(mid) < 2
+			&& IsBIanceTree(root->_left)
+			&& IsBIanceTree(root->_right);
+	}
+
+遍历AVLTree
+void _Inredor(Node* root)
+{
+    if(root==NULL)
+       return ;
+    _Inredor(root->_left)
+    cout<<root->_key<<" ";
+    _Inredor(root->_right);
+}
+
+
